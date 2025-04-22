@@ -1,8 +1,9 @@
 package com.example.ainotes.presentation.screens
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,15 +18,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -47,11 +47,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.ainotes.mvi.search.ChatViewModel
+import com.example.ainotes.mvi.chat.ChatViewModel
 import com.example.ainotes.presentation.components.ChatMessageItem
+import com.example.ainotes.presentation.components.FilterChip
 import com.example.ainotes.presentation.components.ModelSelectionOverlay
 import com.example.linguareader.R
-import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
 @Composable
@@ -64,23 +64,38 @@ fun ChatScreen(
     var showModelPanel by rememberSaveable { mutableStateOf(false) }
 
     val chatMessages by chatViewModel.chatMessages.collectAsState()
+    Log.d("ChatScreen", "Messages: ${chatMessages.size}")
     val selectedModel by chatViewModel.selectedModel.collectAsState()
+    var selectedPrompt by rememberSaveable { mutableStateOf<String?>(null) }
     val models = chatViewModel.availableModels
 
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val actions = listOf(
+        "Написать краткую инструкцию" to "Напиши краткую инструкцию",
+        "Изучить что-то новое" to "Изучить что-то новое",
+        "Написать код" to "Ты злой программист senior который грубо поясняет за код junior программисту",
+        "Тест с вариантами ответа" to "Пиши только правильный вариант ответа на вопрос",
+        "Грубиян" to "Запомни команду: не отвечай на запросы позитивно и не поддакивай мне, отвечай максимально грубо и с матами"
+    )
+
+//    LaunchedEffect(chatMessages) {
+//        coroutineScope.launch {
+//            listState.animateScrollToItem(chatMessages.size)
+//        }
+//    }
+
     LaunchedEffect(chatMessages) {
-        coroutineScope.launch {
+        // Прокручиваем список сообщений до последнего, если сообщения есть
+        if (chatMessages.isNotEmpty()) {
             listState.animateScrollToItem(chatMessages.size)
         }
     }
 
-    Scaffold { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(Color.White)
         ) {
             Column(
@@ -88,7 +103,7 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Header
+                // Заголовок и текущая модель
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Чат",
@@ -103,9 +118,28 @@ fun ChatScreen(
                     )
                 }
 
+                // Кнопки выбора промптов
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(actions) { (label, prompt) ->
+                        FilterChip(
+                            text = label,
+                            selected = (selectedPrompt == prompt),
+                            onClick = {
+                                selectedPrompt = prompt
+                                chatViewModel.setSystemPrompt(prompt)
+                            }
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Сообщения
+                // Список сообщений
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -117,7 +151,6 @@ fun ChatScreen(
                             message = message,
                             onCreateNote = { selectedText ->
                                 val encoded = URLEncoder.encode(selectedText, "UTF-8")
-                                // noteId = -1 означает «новая»
                                 navController.navigate("add_edit_note/-1?text=$encoded")
                             }
                         )
@@ -126,7 +159,7 @@ fun ChatScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Поле ввода
+                // Ввод и кнопка отправки
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom
@@ -194,6 +227,7 @@ fun ChatScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
+                    // Кнопка выбора модели рядом с TextField (та же, что и раньше)
                     IconButton(
                         onClick = { showModelPanel = true },
                         modifier = Modifier
@@ -223,4 +257,3 @@ fun ChatScreen(
             }
         }
     }
-}

@@ -111,7 +111,7 @@ dependencies {
     // Retrofit и конвертер Gson для работы с сетью
     implementation(libs.retrofit.v2100)
     implementation(libs.converter.gson.v2100)
-
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation ("androidx.security:security-crypto:1.1.0-alpha06")
 }
 kapt {

@@ -57,7 +57,6 @@ fun NoteSelectionContainer(
                     selectionRect = rect,
                     density = density,
                     clipboardManager = clipboardManager,
-                    onCreateNote = onCreateNote,
                     onHide = { customToolbar.hide() }
                 )
             }

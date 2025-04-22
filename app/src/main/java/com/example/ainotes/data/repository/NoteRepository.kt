@@ -1,6 +1,5 @@
 package com.example.ainotes.data.repository
 
-import android.util.Log
 import com.example.ainotes.data.local.entity.Note
 import io.realm.Realm
 import kotlinx.coroutines.Dispatchers

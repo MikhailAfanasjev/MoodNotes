@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -58,11 +59,16 @@ fun NoteCard(note: Note, onClick: () -> Unit, onDelete: () -> Unit) {
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-                IconButton(onClick = { onDelete() }) {
+                IconButton(
+                    onClick = { onDelete() },
+                    modifier = Modifier
+                        .size(50.dp) // квадратная форма 50x50
+                        .clip(RoundedCornerShape(8.dp)) // необязательно: скругление краёв
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_remove),
                         contentDescription = "Удалить заметку",
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.size(32.dp) // иконка внутри кнопки
                     )
                 }
             }

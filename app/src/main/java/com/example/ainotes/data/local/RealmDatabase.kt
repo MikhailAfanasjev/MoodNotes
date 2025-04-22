@@ -12,10 +12,10 @@ object RealmHelper {
 
         // 2) Собираем конфигурацию, обязательно подключаем default‑модуль
         val config = RealmConfiguration.Builder()
-            .name("notes.realm")                   // расширение .realm
+            .name("notes.realm")
             .schemaVersion(1)
-            .deleteRealmIfMigrationNeeded()       // на время разработки
-            .modules(getDefaultModule())    // включаем все @RealmObject
+            .deleteRealmIfMigrationNeeded()
+            .modules(getDefaultModule())
             .build()
 
         // 3) Устанавливаем конфигурацию по‑умолчанию

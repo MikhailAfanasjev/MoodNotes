@@ -18,5 +18,7 @@
     <string name="apply">Применить</string>
     <string name="published_date">Дата публикации: %1$s</string>
     <string name="no_description">Описание отсутствует</string>
+    <string name="clear_chat">Очистить чат</string>
+    <string name="delete_all_notes">Удалить заметки</string>
 
 </resources>
