@@ -3,21 +3,8 @@
     <string name="message">Сообщение</string>
     <string name="chat">Чат</string>
     <string name="notes">Заметки</string>
-    <string name="еnter_title_book">Введите название книги, которую ищете</string>
     <string name="request_execution_error">Ошибка выполнения запроса, попробуйте повторить</string>
-    <string name="try_again">Попробовать ещё</string>
-    <string name="nothing_found">По вашему запросу ничего не найдено</string>
-    <string name="error_added_favorites">Ошибка добавления в избранное</string>
-    <string name="successfully_added_favorites">Книга успешно добавлена в избранное</string>
-    <string name="error_removing_favorites">Ошибка удаления избранной книги</string>
-    <string name="successfully_removing_favorites">Книга успешно удалена из избранного</string>
-    <string name="authors">Авторы</string>
-    <string name="sort">Сортировать</string>
-    <string name="by_date">По дате</string>
-    <string name="best_match">Лучшее совпадение</string>
     <string name="apply">Применить</string>
-    <string name="published_date">Дата публикации: %1$s</string>
-    <string name="no_description">Описание отсутствует</string>
     <string name="clear_chat">Очистить чат</string>
     <string name="delete_all_notes">Удалить заметки</string>
 

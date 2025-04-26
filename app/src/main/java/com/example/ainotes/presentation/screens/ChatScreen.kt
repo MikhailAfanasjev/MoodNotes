@@ -54,7 +54,6 @@ import com.example.ainotes.presentation.components.ChatMessageItem
 import com.example.ainotes.presentation.components.FilterChip
 import com.example.ainotes.presentation.components.ModelSelectionOverlay
 import com.example.linguareader.R
-import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
 @Composable
