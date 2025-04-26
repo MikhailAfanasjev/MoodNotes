@@ -1,6 +1,5 @@
-package com.example.ainotes.mvi.chat
+package com.example.ainotes.ViewModels.chat
 
-import android.util.Log
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,21 +30,10 @@ class ChatViewModel @Inject constructor(
     private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
     val chatMessages: StateFlow<List<Message>> = _chatMessages.asStateFlow()
 
-    init {
-        // При старте VM загружаем из БД
-        viewModelScope.launch {
-            val persisted = chatRepo.getAllMessages()
-            .map { Message(it.role, it.content) }
-            _chatMessages.value = persisted
-        }
-    }
-
     private val _selectedModel = MutableStateFlow("grok-3-gemma3-12b-distilled")
     val selectedModel: StateFlow<String> = _selectedModel.asStateFlow()
 
     private val _systemPrompt = MutableStateFlow("Пиши ответы на русском языке")
-    val systemPrompt: StateFlow<String> = _systemPrompt.asStateFlow()
-    private var lastSystemPromptUsed: String? = null
 
     val availableModels = listOf(
         "gemma-3-1b-it",
@@ -53,6 +41,15 @@ class ChatViewModel @Inject constructor(
         "grok-3-gemma3-12b-distilled",
         "gemma-3-27b-it"
     )
+
+    init {
+        viewModelScope.launch {
+            // Загружаем из БД только пользовательские и ассистентские сообщения
+            val persisted = chatRepo.getAllMessages()
+                .map { Message(it.role, it.content) }
+            _chatMessages.value = persisted
+        }
+    }
 
     fun setSystemPrompt(prompt: String) {
         _systemPrompt.value = prompt
@@ -65,35 +62,32 @@ class ChatViewModel @Inject constructor(
     private fun addMessage(message: Message) {
         _chatMessages.value = _chatMessages.value + message
         viewModelScope.launch {
-            val entity = ChatMessageEntity(
-                role = message.role,
-                content = message.content,
-                timestamp = System.currentTimeMillis()
+            chatRepo.addMessage(
+                ChatMessageEntity(
+                    role = message.role,
+                    content = message.content,
+                    timestamp = System.currentTimeMillis()
+                )
             )
-            chatRepo.addMessage(entity)
         }
     }
 
-    private fun updateLastAssistantMessage(content: AnnotatedString) {
+    private fun updateLastAssistantMessage(content: String) {
         val messages = _chatMessages.value.toMutableList()
         val idx = messages.indexOfLast { it.role == "assistant" }
         if (idx != -1) {
-            messages[idx] = messages[idx].copy(content = content.toString())
+            messages[idx] = messages[idx].copy(content = content)
             _chatMessages.value = messages
         }
     }
 
     fun sendMessage(inputText: String) {
-        val currentPromptText = _systemPrompt.value
-        addMessage(Message(role = "user", content = AnnotatedString(inputText).toString()))
+        // Добавляем user-сообщение в UI и репозиторий
+        addMessage(Message(role = "user", content = inputText))
 
         viewModelScope.launch(Dispatchers.IO) {
-            val allMessages = mutableListOf<Message>()
-            if (_chatMessages.value.isEmpty() || currentPromptText != lastSystemPromptUsed) {
-                allMessages.add(Message(role = "system", content = AnnotatedString(currentPromptText).toString()))
-                lastSystemPromptUsed = currentPromptText
-            }
-            allMessages.addAll(_chatMessages.value)
+            // Строим список сообщений для API: сначала системный, затем все UI-сообщения
+            val allMessages = listOf(Message("system", _systemPrompt.value)) + _chatMessages.value
 
             val request = ChatGPTRequest(
                 model = _selectedModel.value,
@@ -109,12 +103,12 @@ class ChatViewModel @Inject constructor(
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        addMessage(Message(role = "assistant", content = AnnotatedString("Ошибка: ${response.code()}").toString()))
+                        addMessage(Message(role = "assistant", content = "Ошибка: ${response.code()}"))
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    addMessage(Message(role = "assistant", content = AnnotatedString("Exception: ${e.localizedMessage}").toString()))
+                    addMessage(Message(role = "assistant", content = "Exception: ${e.localizedMessage}"))
                 }
             }
         }
@@ -123,41 +117,57 @@ class ChatViewModel @Inject constructor(
     private suspend fun streamResponse(source: BufferedSource) {
         val gson = Gson()
         val builder = StringBuilder()
-        var assistantAdded = false
 
+        // 1) Добавляем пустое assistant-сообщение в UI
+        withContext(Dispatchers.Main) {
+            addMessage(Message(role = "assistant", content = ""))
+        }
+
+        // 2) Стримим чанки и обновляем UI
         while (!source.exhausted()) {
             val line = source.readUtf8Line().orEmpty()
             if (line.trim() == "data: [DONE]") break
+
             if (line.startsWith("data:")) {
                 val jsonLine = line.removePrefix("data:").trim()
-                runCatching {
-                    val delta = gson.fromJson(jsonLine, JsonObject::class.java)
+                val chunk = runCatching {
+                    gson.fromJson(jsonLine, JsonObject::class.java)
                         .getAsJsonArray("choices")[0]
                         .asJsonObject["delta"].asJsonObject
-                    delta.get("content")?.asString.orEmpty()
-                }.getOrNull()?.takeIf { it.isNotEmpty() }?.let { chunk ->
+                        .get("content")?.asString.orEmpty()
+                }.getOrNull().orEmpty()
+
+                if (chunk.isNotEmpty()) {
                     builder.append(chunk)
-                    val cleaned = cleanResponse(builder.toString())
+                    val cleaned = cleanResponse(builder.toString()).toString()
                     withContext(Dispatchers.Main) {
-                        if (!assistantAdded) {
-                            addMessage(Message(role = "assistant", content = cleaned.toString()))
-                            assistantAdded = true
-                        } else {
-                            updateLastAssistantMessage(cleaned)
-                        }
+                        updateLastAssistantMessage(cleaned)
                     }
                 }
             }
         }
+
+        val finalRaw = builder.toString()
+        val finalCleaned = cleanResponse(finalRaw).toString()
+
+        withContext(Dispatchers.Main) {
+            updateLastAssistantMessage(finalCleaned)
+        }
+
+        // Сохраняем сырое в БД
+        chatRepo.addMessage(
+            ChatMessageEntity(
+                role = "assistant",
+                content = finalRaw,
+                timestamp = System.currentTimeMillis()
+            )
+        )
     }
 
     fun clearChat() {
         _chatMessages.value = emptyList()
-        lastSystemPromptUsed = null
         viewModelScope.launch {
             chatRepo.deleteAllMessages()
-            _chatMessages.value = emptyList()
-            lastSystemPromptUsed = null
         }
     }
 }

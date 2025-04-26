@@ -19,6 +19,7 @@
         tools:ignore="MissingClass">
         <activity
             android:name="com.example.ainotes.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="true"
             android:theme="@style/Theme.BookSearchApp">
             <intent-filter>

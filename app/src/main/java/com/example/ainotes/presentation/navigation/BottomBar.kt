@@ -20,12 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.ainotes.chatGPT.Message
-import com.example.ainotes.mvi.chat.ChatViewModel
-import com.example.ainotes.mvi.notes.NotesViewModel
+import com.example.ainotes.ViewModels.chat.ChatViewModel
+import com.example.ainotes.ViewModels.notes.NotesViewModel
 import com.example.ainotes.presentation.ui.theme.Blue
 import com.example.ainotes.presentation.ui.theme.LightGray
 import com.example.ainotes.presentation.ui.theme.White
@@ -35,9 +36,9 @@ import com.example.linguareader.R
 @Composable
 fun BottomBar(
     navController: NavController,
-    chatViewModel: ChatViewModel,
+    chatViewModel: ChatViewModel= hiltViewModel(),
     chatMessages: List<Message>,
-    notesViewModel: NotesViewModel     // ← передаём только ViewModel
+    notesViewModel: NotesViewModel = hiltViewModel()
 ) {
     val iconSize = 24.dp
     val navBackStackEntry by navController.currentBackStackEntryAsState()

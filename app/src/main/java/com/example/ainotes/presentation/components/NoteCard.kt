@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -18,19 +19,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.ainotes.data.local.entity.Note
+import com.example.ainotes.utils.cleanResponse
 import com.example.linguareader.R
 
 @Composable
-fun NoteCard(note: Note, onClick: () -> Unit, onDelete: () -> Unit) {
+fun NoteCard(
+    note: Note,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val maxNoteHeight = screenHeight / 4
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp), // аналогичный ChatMessageItem
+            .padding(vertical = 4.dp)
+            .clickable { onClick() },    // ← клик по карточке
         horizontalArrangement = Arrangement.Start
     ) {
         Box(
@@ -40,7 +52,6 @@ fun NoteCard(note: Note, onClick: () -> Unit, onDelete: () -> Unit) {
                     color = colorResource(id = R.color.ultra_light_gray),
                     shape = RoundedCornerShape(16.dp)
                 )
-                .clickable { onClick() } // обработка клика по всей карточке
                 .padding(8.dp)
         ) {
             Row(
@@ -48,28 +59,54 @@ fun NoteCard(note: Note, onClick: () -> Unit, onDelete: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(max = maxNoteHeight)
                 ) {
                     Text(
                         text = note.title,
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = note.note,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = cleanResponse(note.note),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = Int.MAX_VALUE,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-                IconButton(
-                    onClick = { onDelete() },
-                    modifier = Modifier
-                        .size(50.dp) // квадратная форма 50x50
-                        .clip(RoundedCornerShape(8.dp)) // необязательно: скругление краёв
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_remove),
-                        contentDescription = "Удалить заметку",
-                        modifier = Modifier.size(32.dp) // иконка внутри кнопки
-                    )
+                Column {
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                color = colorResource(id = R.color.ultra_light_gray),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_remove),
+                            contentDescription = "Удалить заметку",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = onEdit,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                color = colorResource(id = R.color.ultra_light_gray),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(top = 4.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_edit),
+                            contentDescription = "Редактировать заметку",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
         }

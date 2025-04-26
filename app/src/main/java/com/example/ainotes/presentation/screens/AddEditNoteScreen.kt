@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -27,39 +27,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import com.example.ainotes.mvi.notes.NotesViewModel
+import com.example.ainotes.ViewModels.notes.NotesViewModel
+import com.example.ainotes.utils.cleanResponse
 import com.example.linguareader.R
 
 @Composable
 fun AddEditNoteScreen(
     navController: NavController,
     noteId: Long?,
-    viewModel: NotesViewModel,
+    viewModel: NotesViewModel = hiltViewModel(),
     initialText: String = ""
 ) {
-    // Преобразуем в Long? и сразу считаем флаг редактирования
     val noteIdLong: Long? = noteId?.toLong()
     val isEditing = noteIdLong != null && noteIdLong != -1L
 
     var title by remember { mutableStateOf("") }
-    var noteContent by remember { mutableStateOf(initialText) }
+    var noteContent by remember { mutableStateOf(cleanResponse(initialText).toString()) }
     val context = LocalContext.current
-
     val notes by viewModel.notes.collectAsState()
 
-    // При редактировании подгружаем данные
     LaunchedEffect(isEditing, notes) {
         if (isEditing) {
             notes.find { it.id == noteIdLong }?.let { existing ->
                 title = existing.title
-                noteContent = existing.note
+                noteContent = cleanResponse(existing.note).toString()
             }
         }
     }
@@ -72,15 +70,14 @@ fun AddEditNoteScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            // Поле заголовка
+            // Заголовок заметки
             TextField(
                 value = title,
                 onValueChange = { title = it },
                 placeholder = { Text("Заголовок") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .wrapContentHeight(),
+                    .height(56.dp),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
@@ -95,17 +92,16 @@ fun AddEditNoteScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // Поле заметки
+            // Поле заметки: занимает оставшееся пространство и скроллится
             TextField(
                 value = noteContent,
                 onValueChange = { noteContent = it },
                 placeholder = { Text("Заметка") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 56.dp, max = LocalConfiguration.current.screenHeightDp.dp)
-                    .wrapContentHeight(),
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
                 singleLine = false,
-                maxLines = Int.MAX_VALUE,
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF5F5F5),
@@ -118,7 +114,7 @@ fun AddEditNoteScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // Кнопка Создать/Обновить в AddEditNoteScreen
+            // Кнопка Создать/Обновить
             Button(
                 onClick = {
                     if (!isEditing) {
@@ -128,10 +124,7 @@ fun AddEditNoteScreen(
                         viewModel.updateNote(noteIdLong!!, title, noteContent)
                         Toast.makeText(context, "Заметка обновлена", Toast.LENGTH_SHORT).show()
                     }
-                    // Очистка стека и переход на NoteScreen
                     navController.navigate("notes") {
-                        // Очищаем стек от всех предыдущих экранов,
-                        // включая add_edit_note, чтобы не было «залипания»
                         popUpTo(navController.graph.id) { inclusive = true }
                         launchSingleTop = true
                         restoreState = true
@@ -143,7 +136,7 @@ fun AddEditNoteScreen(
                 Text(if (!isEditing) "Создать заметку" else "Обновить заметку")
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
 
             // Кнопка Отменить
             Button(

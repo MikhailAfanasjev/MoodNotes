@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -46,18 +47,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.ainotes.mvi.chat.ChatViewModel
+import com.example.ainotes.ViewModels.chat.ChatViewModel
 import com.example.ainotes.presentation.components.ChatMessageItem
 import com.example.ainotes.presentation.components.FilterChip
 import com.example.ainotes.presentation.components.ModelSelectionOverlay
 import com.example.linguareader.R
+import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
 @Composable
 fun ChatScreen(
     navController: NavHostController,
-    chatViewModel: ChatViewModel
+    chatViewModel: ChatViewModel = hiltViewModel()
 ) {
     var userInput by rememberSaveable { mutableStateOf("") }
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
@@ -80,29 +83,24 @@ fun ChatScreen(
         "Грубиян" to "Запомни команду: не отвечай на запросы позитивно и не поддакивай мне, отвечай максимально грубо и с матами"
     )
 
-//    LaunchedEffect(chatMessages) {
-//        coroutineScope.launch {
-//            listState.animateScrollToItem(chatMessages.size)
-//        }
-//    }
-
     LaunchedEffect(chatMessages) {
-        // Прокручиваем список сообщений до последнего, если сообщения есть
         if (chatMessages.isNotEmpty()) {
             listState.animateScrollToItem(chatMessages.size)
         }
     }
 
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            // добавляем отступ снизу равный высоте клавиатуры
+            .imePadding()
+            .background(Color.White)
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
                 // Заголовок и текущая модель
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -151,7 +149,10 @@ fun ChatScreen(
                             message = message,
                             onCreateNote = { selectedText ->
                                 val encoded = URLEncoder.encode(selectedText, "UTF-8")
-                                navController.navigate("add_edit_note/-1?text=$encoded")
+                                navController.currentBackStackEntry
+                                    ?.savedStateHandle
+                                    ?.set("initialText", selectedText)
+                                navController.navigate("add_edit_note/-1")
                             }
                         )
                     }
@@ -227,7 +228,7 @@ fun ChatScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // Кнопка выбора модели рядом с TextField (та же, что и раньше)
+                    // Кнопка выбора модели рядом с TextField
                     IconButton(
                         onClick = { showModelPanel = true },
                         modifier = Modifier

@@ -1,65 +1,101 @@
 package com.example.ainotes.presentation.components
 
-import androidx.compose.foundation.text.selection.SelectionContainer
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.text.Selection
+import android.text.Spannable
+import android.view.ActionMode
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.TextView
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.platform.TextToolbarStatus
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+
+private const val MENU_ID_CREATE_NOTE = 1
+private const val MENU_ID_COPY = 2
+private const val MENU_ID_SELECT_ALL = 3
 
 @Composable
 fun NoteSelectionContainer(
+    text: String,
     onCreateNote: (String) -> Unit,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier
 ) {
-    val defaultToolbar = LocalTextToolbar.current
-    val clipboardManager = LocalClipboardManager.current
-    val density = LocalDensity.current
+    val context = LocalContext.current
 
-    var selectionRect by remember { mutableStateOf<Rect?>(null) }
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            TextView(ctx).apply {
+                // делаем текст чёрным
+                setTextColor(android.graphics.Color.BLACK)
+                setText(text, TextView.BufferType.SPANNABLE)
+                setTextIsSelectable(true)
+            }.also { tv ->
+                tv.customSelectionActionModeCallback = object : ActionMode.Callback {
+                    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                        menu.clear()
+                        menu.add(0, MENU_ID_CREATE_NOTE, 0, "Создать заметку")
+                        menu.add(0, MENU_ID_COPY, 1, "Копировать")
+                        menu.add(0, MENU_ID_SELECT_ALL, 2, "Select all")
+                        return true
+                    }
+                    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                        menu.clear()
+                        menu.add(0, MENU_ID_CREATE_NOTE, 0, "Создать заметку")
+                        menu.add(0, MENU_ID_COPY, 1, "Копировать")
+                        menu.add(0, MENU_ID_SELECT_ALL, 2, "Выбрать всё")
+                        return true
+                    }
+                    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                        val selStart = tv.selectionStart.coerceAtLeast(0)
+                        val selEnd = tv.selectionEnd.coerceAtLeast(0)
+                        val selectedText = tv.text.substring(
+                            selStart.coerceAtMost(selEnd),
+                            selEnd.coerceAtLeast(selStart)
+                        )
+                        when (item.itemId) {
+                            MENU_ID_CREATE_NOTE -> {
+                                onCreateNote(selectedText)
+                                mode.finish()
+                                return true
+                            }
+                            MENU_ID_COPY -> {
+                                val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("text", selectedText))
+                                mode.finish()
+                                return true
+                            }
+                            MENU_ID_SELECT_ALL -> {
+                                (tv.text as? Spannable)?.let { sp ->
+                                    Selection.selectAll(sp)
+                                }
+                                mode.invalidate()
+                                return true
+                            }
+                        }
+                        return false
+                    }
+                    override fun onDestroyActionMode(mode: ActionMode) {}
+                }
 
-    val customToolbar = remember(defaultToolbar) {
-        object : TextToolbar {
-            override val status: TextToolbarStatus = defaultToolbar.status
-
-            override fun showMenu(
-                rect: Rect,
-                onCopyRequested: (() -> Unit)?,
-                onPasteRequested: (() -> Unit)?,
-                onCutRequested: (() -> Unit)?,
-                onSelectAllRequested: (() -> Unit)?
-            ) {
-                onCopyRequested?.invoke()
-                defaultToolbar.hide()
-                selectionRect = rect
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    tv.customInsertionActionModeCallback = object : ActionMode.Callback {
+                        override fun onCreateActionMode(mode: ActionMode, menu: Menu) = false
+                        override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+                        override fun onActionItemClicked(mode: ActionMode, item: MenuItem) = false
+                        override fun onDestroyActionMode(mode: ActionMode) {}
+                    }
+                }
             }
-
-            override fun hide() {
-                defaultToolbar.hide()
-                selectionRect = null
+        },
+        update = { tv ->
+            if (tv.text.toString() != text) {
+                tv.text = text
             }
         }
-    }
-
-    CompositionLocalProvider(LocalTextToolbar provides customToolbar) {
-        androidx.compose.foundation.layout.Box {
-            SelectionContainer { content() }
-
-            selectionRect?.let { rect ->
-                NoteSelectionPopup(
-                    selectionRect = rect,
-                    density = density,
-                    clipboardManager = clipboardManager,
-                    onHide = { customToolbar.hide() }
-                )
-            }
-        }
-    }
+    )
 }

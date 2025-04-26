@@ -3,6 +3,7 @@ package com.example.ainotes.di
 import android.content.Context
 import com.example.ainotes.chatGPT.AuthInterceptor
 import com.example.ainotes.chatGPT.ChatGPTApiService
+import com.example.ainotes.utils.BaseUrlInterceptor
 import com.example.ainotes.utils.BaseUrlManager
 import dagger.Module
 import dagger.Provides
@@ -20,34 +21,32 @@ import java.util.concurrent.TimeUnit
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
-    @Singleton
-    fun provideBaseUrlManager(@ApplicationContext context: Context): BaseUrlManager =
-        BaseUrlManager(context)
+    @Provides @Singleton
+    fun provideBaseUrlManager(@ApplicationContext ctx: Context) =
+        BaseUrlManager(ctx)
 
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    @Provides @Singleton
+    fun provideOkHttpClient(
+        baseUrlManager: BaseUrlManager
+    ): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(100, TimeUnit.SECONDS)
             .readTimeout(100, TimeUnit.SECONDS)
             .addInterceptor(AuthInterceptor())
+            .addInterceptor(BaseUrlInterceptor(baseUrlManager))
             .build()
 
-    @Provides
-    @Singleton
+    @Provides @Singleton
     fun provideRetrofit(
-        baseUrlManager: BaseUrlManager,
         okHttpClient: OkHttpClient
     ): Retrofit =
         Retrofit.Builder()
-            .baseUrl(baseUrlManager.getBaseUrl())
+            .baseUrl("http://localhost/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-    @Provides
-    @Singleton
+    @Provides @Singleton
     fun provideChatGPTApiService(retrofit: Retrofit): ChatGPTApiService =
         retrofit.create(ChatGPTApiService::class.java)
 }

@@ -3,7 +3,6 @@ package com.example.ainotes
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -20,8 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ainotes.presentation.navigation.BottomBar
 import com.example.ainotes.presentation.navigation.NavGraph
 import com.example.ainotes.chatGPT.ApiKeyHelper
-import com.example.ainotes.mvi.chat.ChatViewModel
-import com.example.ainotes.mvi.notes.NotesViewModel
+import com.example.ainotes.ViewModels.chat.ChatViewModel
+import com.example.ainotes.ViewModels.notes.NotesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

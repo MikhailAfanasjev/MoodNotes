@@ -1,4 +1,4 @@
-package com.example.ainotes.mvi.notes
+package com.example.ainotes.ViewModels.notes
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
