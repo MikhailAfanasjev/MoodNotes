@@ -38,7 +38,7 @@ class ChatViewModel @Inject constructor(
     val availableModels = listOf(
         "gemma-3-1b-it",
         "gemma-3-4b-it",
-        "grok-3-gemma3-12b-distilled",
+        "grok-3-gemma3-12b",
         "gemma-3-27b-it"
     )
 

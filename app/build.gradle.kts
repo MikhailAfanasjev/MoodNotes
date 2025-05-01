@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.linguareader"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.linguareader"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -57,10 +57,10 @@ android {
 }
 
 dependencies {
-    implementation ("androidx.compose.ui:ui-tooling-preview:1.3.0") // Для Preview
+    implementation (libs.ui.tooling.preview) // Для Preview
 
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     implementation(libs.androidx.core.ktx)  // Основная библиотека Android KTX
     implementation(libs.androidx.lifecycle.runtime.ktx)  // Жизненный цикл KTX
@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)  // Библиотека графики Compose
     implementation(libs.androidx.ui.tooling.preview)  // Поддержка предпросмотра в Android Studio
     implementation(libs.androidx.material3)  // Material Design 3 для Jetpack Compose
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation (libs.androidx.hilt.navigation.compose.v100)
 
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.espresso.core)
@@ -79,9 +79,9 @@ dependencies {
     implementation(libs.protolite.well.known.types)
     implementation(libs.androidx.ui.test.android)
 
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation ("androidx.navigation:navigation-compose:2.8.4")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation(libs.androidx.core.ktx.v1160)
+    implementation (libs.androidx.navigation.compose.v289)
+    implementation(libs.androidx.work.runtime.ktx)
 
 
     //Realm
@@ -93,9 +93,9 @@ dependencies {
     //  implementation("com.gemalto.jp2:jp2-android:1.0.3")
 
     implementation(libs.hilt.android.v252)
-    kapt("com.google.dagger:hilt-compiler:2.52")
+    kapt(libs.hilt.compiler.v252)
     // Gson
-    implementation ("com.google.code.gson:gson:2.8.8")
+    implementation (libs.gson)
 
     // Тестирование
     testImplementation(libs.junit)  // JUnit для юнит-тестирования
@@ -111,8 +111,8 @@ dependencies {
     // Retrofit и конвертер Gson для работы с сетью
     implementation(libs.retrofit.v2100)
     implementation(libs.converter.gson.v2100)
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation (libs.logging.interceptor)
+    implementation (libs.androidx.security.crypto)
 }
 kapt {
     correctErrorTypes = true

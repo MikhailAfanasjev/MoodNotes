@@ -16,7 +16,7 @@ import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.ainotes.presentation.navigation.BottomBar
+import com.example.ainotes.presentation.navigation.TopBar
 import com.example.ainotes.presentation.navigation.NavGraph
 import com.example.ainotes.chatGPT.ApiKeyHelper
 import com.example.ainotes.ViewModels.chat.ChatViewModel
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                 val notes by notesViewModel.notes.collectAsState()
 
                 Scaffold(
-                    bottomBar = {
+                    topBar = {
                         val currentRoute = navController
                             .currentBackStackEntryAsState()
                             .value
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                             ?.route ?: ""
 
                         if (!currentRoute.startsWith("detail")) {
-                            BottomBar(
+                            TopBar(
                                 navController     = navController,
                                 chatViewModel     = chatViewModel,
                                 chatMessages      = chatMessages,

@@ -101,19 +101,19 @@ fun ChatScreen(
                 .padding(16.dp)
         ) {
                 // Заголовок и текущая модель
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Чат",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.DarkGray
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = selectedModel,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray
-                    )
-                }
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Text(
+//                        text = "Чат",
+//                        style = MaterialTheme.typography.headlineMedium,
+//                        color = Color.DarkGray
+//                    )
+//                    Spacer(modifier = Modifier.weight(1f))
+//                    Text(
+//                        text = selectedModel,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = Color.DarkGray
+//                    )
+//                }
 
                 // Кнопки выбора промптов
                 LazyRow(

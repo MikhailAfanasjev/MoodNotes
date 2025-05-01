@@ -2,11 +2,16 @@
 agp = "8.7.1"
 androidxHiltNavigationComposeVersion = "<version>"
 androidxNavigationComposeVersion = "2.8.4"
+coilCompose = "3.0.4"
 converterGsonVersion = "2.10.0"
+coreKtxVersion = "1.16.0"
 googleHiltAndroid = "2.52"
+gson = "2.10.1"
 hiltAndroid = "2.48.1"
 hiltAndroidVersion = "2.48.1"
 hiltCompiler = "2.48.1"
+hiltCompilerVersion = "2.52"
+hiltNavigationCompose = "1.0.0"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -15,6 +20,8 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
 composeBom = "2024.04.01"
+loggingInterceptor = "4.12.0"
+navigationCompose = "2.8.9"
 pdfboxAndroid = "2.0.27.0"
 realmAndroidLibrary = "10.19.0"
 realmGradlePlugin = "10.19.0"
@@ -26,18 +33,30 @@ appcompat = "1.7.0"
 protoliteWellKnownTypes = "18.0.0"
 retrofit = "2.9.0"
 converterGson = "2.9.0"
+securityCrypto = "1.1.0-alpha07"
 uiTestAndroid = "1.7.2"
 realm = "10.19.0"
+uiToolingPreview = "1.8.0"
+workRuntimeKtx = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-ktx-v1160 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 androidx-hilt-hilt-navigation-compose2 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHiltNavigationComposeVersion" }
+androidx-hilt-navigation-compose-v100 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-navigation-compose-v289 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-navigation-compose2 = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationComposeVersion" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroidVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android-v2481 = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-v252 = { module = "com.google.dagger:hilt-android", version.ref = "googleHiltAndroid" }
 hilt-compiler-v2481 = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+hilt-compiler-v252 = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompilerVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -57,6 +76,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 realm-android-library = { module = "io.realm:realm-android-library", version.ref = "realmAndroidLibrary" }
@@ -65,6 +85,7 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 converter-gson-v2100 = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGsonVersion" }
 retrofit-v2100 = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
+ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
