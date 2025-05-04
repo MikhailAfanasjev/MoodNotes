@@ -62,12 +62,11 @@ fun ChatScreen(
     var userInput by rememberSaveable { mutableStateOf("") }
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
     var showModelPanel by rememberSaveable { mutableStateOf(false) }
-
     val chatMessages by chatViewModel.chatMessages.collectAsState()
     val selectedModel by chatViewModel.selectedModel.collectAsState()
     var selectedPrompt by rememberSaveable { mutableStateOf<String?>(null) }
     val models = chatViewModel.availableModels
-
+    val isWriting by chatViewModel.isAssistantWriting.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -153,7 +152,9 @@ fun ChatScreen(
             ) {
                 TextField(
                     value = userInput,
-                    onValueChange = { userInput = it },
+                    onValueChange = { newText ->
+                        userInput = newText
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .animateContentSize()
@@ -163,7 +164,7 @@ fun ChatScreen(
                         Text(
                             text = stringResource(R.string.message),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSecondary,        // onSecondary = цвет текста полей ввода
+                            color = colorScheme.onSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -172,61 +173,78 @@ fun ChatScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_chat),
                             contentDescription = null,
-                            tint = colorScheme.onSecondary             // onSecondary = цвет иконки в поле ввода
+                            tint = colorScheme.onSecondary
                         )
                     },
                     trailingIcon = {
-                        if (userInput.isNotBlank()) {
-                            IconButton(onClick = {
-                                chatViewModel.sendMessage(userInput)
-                                userInput = ""
-                                keyboardController?.hide()
-                            }) {
+                        if (!isWriting) {
+                            // обычная кнопка отправки
+                            IconButton(
+                                onClick = {
+                                    chatViewModel.sendMessage(userInput)
+                                    userInput = ""
+                                    keyboardController?.hide()
+                                },
+                                enabled = userInput.isNotBlank()
+                            ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_send_message),
                                     contentDescription = "Отправить сообщение",
-                                    modifier = Modifier.size(24.dp),
-                                    tint = colorScheme.tertiary
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        } else {
+                            // во время стриминга — стоп-кнопка
+                            IconButton(
+                                onClick = { chatViewModel.stopGeneration() }
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_stop),
+                                    contentDescription = "Остановить генерацию",
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
                     },
+                    readOnly = isWriting,
                     singleLine = false,
                     maxLines = 10,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(
+                        onSend = {
+                            if (userInput.isNotBlank() && !isWriting) {
+                                chatViewModel.sendMessage(userInput)
+                                userInput = ""
+                                keyboardController?.hide()
+                            }
+                        }
+                    ),
                     shape = RoundedCornerShape(12.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colorScheme.secondary,    // secondary = фон поля ввода
-                        unfocusedContainerColor = colorScheme.secondary,  // secondary = фон поля ввода
-                        disabledContainerColor = colorScheme.secondary,   // secondary = фон поля ввода
+                        focusedContainerColor = colorScheme.secondary,
+                        unfocusedContainerColor = colorScheme.secondary,
+                        disabledContainerColor = colorScheme.secondary,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = colorScheme.tertiary,             // tertiary = цвет курсора
+                        cursorColor = colorScheme.tertiary,
                         focusedTextColor = colorScheme.onSecondary,
                         unfocusedTextColor = colorScheme.onSecondary,
                         disabledTextColor = colorScheme.onSecondary
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(onSend = {
-                        if (userInput.isNotBlank()) {
-                            chatViewModel.sendMessage(userInput)
-                            userInput = ""
-                            keyboardController?.hide()
-                        }
-                    })
+                    )
                 )
             }
-        }
 
-        if (showModelPanel) {
-            ModelSelectionOverlay(
-                models = models,
-                selectedModel = selectedModel,
-                onModelSelected = {
-                    chatViewModel.setModel(it)
-                    showModelPanel = false
-                },
-                onDismiss = { showModelPanel = false }
-            )
+            if (showModelPanel) {
+                ModelSelectionOverlay(
+                    models = models,
+                    selectedModel = selectedModel,
+                    onModelSelected = {
+                        chatViewModel.setModel(it)
+                        showModelPanel = false
+                    },
+                    onDismiss = { showModelPanel = false }
+                )
+            }
         }
     }
 }
