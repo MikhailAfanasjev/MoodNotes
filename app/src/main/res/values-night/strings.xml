@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AINotes</string>
+    <string name="message">Сообщение</string>
+    <string name="chat">Чат</string>
+    <string name="notes">Заметки</string>
+    <string name="request_execution_error">Ошибка выполнения запроса, попробуйте повторить</string>
+    <string name="apply">Применить</string>
+    <string name="clear_chat">Очистить чат</string>
+    <string name="delete_all_notes">Удалить заметки</string>
+    <string name="more_options">Опции</string>
+</resources>

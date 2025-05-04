@@ -1,6 +1,5 @@
 package com.example.ainotes.presentation.screens
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -49,7 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.ainotes.ViewModels.chat.ChatViewModel
+import com.example.ainotes.viewModels.ChatViewModel
 import com.example.ainotes.presentation.components.ChatMessageItem
 import com.example.ainotes.presentation.components.FilterChip
 import com.example.ainotes.presentation.components.ModelSelectionOverlay
@@ -66,7 +64,6 @@ fun ChatScreen(
     var showModelPanel by rememberSaveable { mutableStateOf(false) }
 
     val chatMessages by chatViewModel.chatMessages.collectAsState()
-    Log.d("ChatScreen", "Messages: ${chatMessages.size}")
     val selectedModel by chatViewModel.selectedModel.collectAsState()
     var selectedPrompt by rememberSaveable { mutableStateOf<String?>(null) }
     val models = chatViewModel.availableModels
@@ -76,9 +73,11 @@ fun ChatScreen(
 
     val actions = listOf(
         "Написать краткую инструкцию" to "Напиши краткую инструкцию",
-        "Изучить что-то новое" to "Изучить что-то новое",
         "Написать код" to "Ты злой программист senior который грубо поясняет за код junior программисту",
         "Тест с вариантами ответа" to "Пиши только правильный вариант ответа на вопрос",
+        "Написать историю" to "Ты исполняешь роль писателя. Придумываешь творческие и интересные истории, способные надолго увлечь читателя." +
+                " Ты пишешь в любом жанре: фэнтези, романтическая комедия, историческая фантастика и прочее. Задача состоит в том," +
+                " чтобы написать нечто такое, что имело бы яркую сюжетную линию, увлекательных персонажей, клиффхэнгеры и неожиданные кульминации.",
         "Грубиян" to "Запомни команду: не отвечай на запросы позитивно и не поддакивай мне, отвечай максимально грубо и с матами"
     )
 
@@ -88,172 +87,146 @@ fun ChatScreen(
         }
     }
 
+    val colorScheme = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // добавляем отступ снизу равный высоте клавиатуры
             .imePadding()
-            .background(Color.White)
+            .background(colorScheme.background)               // background = White / VeryDarkGray
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-                // Заголовок и текущая модель
-//                Row(verticalAlignment = Alignment.CenterVertically) {
-//                    Text(
-//                        text = "Чат",
-//                        style = MaterialTheme.typography.headlineMedium,
-//                        color = Color.DarkGray
-//                    )
-//                    Spacer(modifier = Modifier.weight(1f))
-//                    Text(
-//                        text = selectedModel,
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = Color.DarkGray
-//                    )
-//                }
-
-                // Кнопки выбора промптов
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(actions) { (label, prompt) ->
-                        FilterChip(
-                            text = label,
-                            selected = (selectedPrompt == prompt),
-                            onClick = {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(actions) { (label, prompt) ->
+                    FilterChip(
+                        text = label,
+                        selected = (selectedPrompt == prompt),
+                        onClick = {
+                            if (selectedPrompt == prompt) {
+                                selectedPrompt = null
+                                chatViewModel.setSystemPrompt(chatViewModel.defaultSystemPrompt)
+                            } else {
                                 selectedPrompt = prompt
                                 chatViewModel.setSystemPrompt(prompt)
                             }
-                        )
-                    }
+                        }
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // Список сообщений
-                LazyColumn(
-                    state = listState,
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                items(chatMessages) { message ->
+                    ChatMessageItem(
+                        message = message,
+                        onCreateNote = { selectedText ->
+                            val encoded = URLEncoder.encode(selectedText, "UTF-8")
+                            navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("initialText", selectedText)
+                            navController.navigate("add_edit_note/-1")
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                TextField(
+                    value = userInput,
+                    onValueChange = { userInput = it },
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    items(chatMessages) { message ->
-                        ChatMessageItem(
-                            message = message,
-                            onCreateNote = { selectedText ->
-                                val encoded = URLEncoder.encode(selectedText, "UTF-8")
-                                navController.currentBackStackEntry
-                                    ?.savedStateHandle
-                                    ?.set("initialText", selectedText)
-                                navController.navigate("add_edit_note/-1")
-                            }
+                        .animateContentSize()
+                        .heightIn(min = 56.dp, max = 300.dp)
+                        .wrapContentHeight(),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.onSecondary,        // onSecondary = цвет текста полей ввода
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Ввод и кнопка отправки
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    TextField(
-                        value = userInput,
-                        onValueChange = { userInput = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .animateContentSize()
-                            .heightIn(min = 56.dp, max = 300.dp)
-                            .wrapContentHeight(),
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.message),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.LightGray,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_chat),
-                                contentDescription = null,
-                                tint = Color.LightGray
-                            )
-                        },
-                        trailingIcon = {
-                            if (userInput.isNotBlank()) {
-                                IconButton(onClick = {
-                                    chatViewModel.sendMessage(userInput)
-                                    userInput = ""
-                                    keyboardController?.hide()
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_send_message),
-                                        contentDescription = "Отправить сообщение",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = Color.LightGray
-                                    )
-                                }
-                            }
-                        },
-                        singleLine = false,
-                        maxLines = 10,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF5F5F5),
-                            unfocusedContainerColor = Color(0xFFF5F5F5),
-                            disabledContainerColor = Color.LightGray,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = Color.Black
-                        ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                        keyboardActions = KeyboardActions(onSend = {
-                            if (userInput.isNotBlank()) {
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chat),
+                            contentDescription = null,
+                            tint = colorScheme.onSecondary             // onSecondary = цвет иконки в поле ввода
+                        )
+                    },
+                    trailingIcon = {
+                        if (userInput.isNotBlank()) {
+                            IconButton(onClick = {
                                 chatViewModel.sendMessage(userInput)
                                 userInput = ""
                                 keyboardController?.hide()
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_send_message),
+                                    contentDescription = "Отправить сообщение",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = colorScheme.tertiary
+                                )
                             }
-                        })
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Кнопка выбора модели рядом с TextField
-                    IconButton(
-                        onClick = { showModelPanel = true },
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(12.dp))
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_filter),
-                            tint = Color.LightGray,
-                            contentDescription = "Выбор модели"
-                        )
-                    }
-                }
-            }
-
-            // Панель выбора модели
-            if (showModelPanel) {
-                ModelSelectionOverlay(
-                    models = models,
-                    selectedModel = selectedModel,
-                    onModelSelected = {
-                        chatViewModel.setModel(it)
-                        showModelPanel = false
+                        }
                     },
-                    onDismiss = { showModelPanel = false }
+                    singleLine = false,
+                    maxLines = 10,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = colorScheme.secondary,    // secondary = фон поля ввода
+                        unfocusedContainerColor = colorScheme.secondary,  // secondary = фон поля ввода
+                        disabledContainerColor = colorScheme.secondary,   // secondary = фон поля ввода
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = colorScheme.tertiary,             // tertiary = цвет курсора
+                        focusedTextColor = colorScheme.onSecondary,
+                        unfocusedTextColor = colorScheme.onSecondary,
+                        disabledTextColor = colorScheme.onSecondary
+                    ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = {
+                        if (userInput.isNotBlank()) {
+                            chatViewModel.sendMessage(userInput)
+                            userInput = ""
+                            keyboardController?.hide()
+                        }
+                    })
                 )
             }
         }
+
+        if (showModelPanel) {
+            ModelSelectionOverlay(
+                models = models,
+                selectedModel = selectedModel,
+                onModelSelected = {
+                    chatViewModel.setModel(it)
+                    showModelPanel = false
+                },
+                onDismiss = { showModelPanel = false }
+            )
+        }
     }
+}

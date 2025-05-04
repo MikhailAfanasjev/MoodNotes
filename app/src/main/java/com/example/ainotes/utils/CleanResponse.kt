@@ -3,6 +3,7 @@ package com.example.ainotes.utils
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -15,42 +16,66 @@ import androidx.compose.ui.text.withStyle
  * 4) ### Заголовок → переведённый в UPPERCASE между пустыми строками
  */
 fun cleanResponse(response: String): AnnotatedString {
-    // 1. Сначала обрабатываем списки и заголовки в “чистый” текст:
+    // 1. Обработка списков и заголовков
     val preprocessed = response
-        // замена "- " или "* " в начале строки на эм‑деш
         .replace(Regex("(?m)^\\s*[-*]\\s+"), "— ")
-        // обработка заголовков ### — делаем UPPERCASE с заглавной буквой и изменяем шрифт
         .replace(Regex("(?m)^###\\s*(.*)$")) { m ->
-            m.groupValues[1]
-                .replaceFirstChar { it.uppercaseChar() }  // Переводим первую букву в верхний регистр
+            m.groupValues[1].replaceFirstChar { it.uppercaseChar() }
         }
 
-    // 2. Регекс на inline-формат **bold** или *italic*
+    // 2. Разбиваем текст на блоки — обычный и ```код```
+    val codeBlockPattern = Regex("```(.*?)```", RegexOption.DOT_MATCHES_ALL)
+    val parts = mutableListOf<Pair<String, SpanStyle?>>()
+
+    var lastIndex = 0
+    for (match in codeBlockPattern.findAll(preprocessed)) {
+        val start = match.range.first
+        val end = match.range.last + 1
+
+        // Добавляем обычный текст до блока кода
+        if (start > lastIndex) {
+            parts.add(preprocessed.substring(lastIndex, start) to null)
+        }
+
+        // Добавляем содержимое кода без ``` и со стилем
+        val codeContent = match.groupValues[1].trim('\n')
+        parts.add(codeContent to SpanStyle(fontFamily = FontFamily.Monospace))
+
+        lastIndex = end
+    }
+    // Добавляем остаток после последнего блока
+    if (lastIndex < preprocessed.length) {
+        parts.add(preprocessed.substring(lastIndex) to null)
+    }
+
+    // 3. Собираем AnnotatedString с учётом *italic* и **bold**
     val inlinePattern = Regex("\\*\\*(.*?)\\*\\*|\\*(.*?)\\*")
 
-    // 3. Собираем AnnotatedString
     return buildAnnotatedString {
-        var lastIndex = 0
-        for (m in inlinePattern.findAll(preprocessed)) {
-            // копируем текст между предыдущим совпадением и этим
-            append(preprocessed.substring(lastIndex, m.range.first))
-
-            // **bold**?
-            m.groups[1]?.let { boldGroup ->
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(boldGroup.value)
+        for ((text, style) in parts) {
+            if (style != null) {
+                // Моноширинный блок — без дополнительной обработки
+                withStyle(style) {
+                    append(text)
                 }
-            }
-            // *italic*?
-            m.groups[2]?.let { italicGroup ->
-                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                    append(italicGroup.value)
-                }
-            }
+            } else {
+                // Обычный текст с inline-форматированием
+                var last = 0
+                for (m in inlinePattern.findAll(text)) {
+                    append(text.substring(last, m.range.first))
 
-            lastIndex = m.range.last + 1
+                    when {
+                        m.groups[1] != null -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(m.groups[1]!!.value)
+                        }
+                        m.groups[2] != null -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                            append(m.groups[2]!!.value)
+                        }
+                    }
+                    last = m.range.last + 1
+                }
+                append(text.substring(last))
+            }
         }
-        // остаток строки
-        append(preprocessed.substring(lastIndex))
     }
 }

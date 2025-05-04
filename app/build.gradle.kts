@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.compose.compiler)
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
@@ -65,11 +66,14 @@ dependencies {
     implementation(libs.androidx.core.ktx)  // Основная библиотека Android KTX
     implementation(libs.androidx.lifecycle.runtime.ktx)  // Жизненный цикл KTX
     implementation(libs.androidx.activity.compose)  // Поддержка компонентов Activity для Compose
+    implementation(libs.androidx.constraintlayout.compose)
+    //implementation(libs.textflow.material3)
     implementation(platform(libs.androidx.compose.bom))  // BOM для управления версиями Compose
     implementation(libs.androidx.ui)  // Основной модуль Compose UI
     implementation(libs.androidx.ui.graphics)  // Библиотека графики Compose
     implementation(libs.androidx.ui.tooling.preview)  // Поддержка предпросмотра в Android Studio
     implementation(libs.androidx.material3)  // Material Design 3 для Jetpack Compose
+    implementation(libs.material)
     implementation (libs.androidx.hilt.navigation.compose.v100)
 
     implementation(libs.androidx.runtime.livedata)
@@ -83,6 +87,10 @@ dependencies {
     implementation (libs.androidx.navigation.compose.v289)
     implementation(libs.androidx.work.runtime.ktx)
 
+    implementation (libs.androidx.datastore.preferences)
+
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.datastore.preferences)
 
     //Realm
     implementation (libs.realm.android.library)
@@ -93,6 +101,9 @@ dependencies {
     //  implementation("com.gemalto.jp2:jp2-android:1.0.3")
 
     implementation(libs.hilt.android.v252)
+    implementation ("androidx.datastore:datastore-preferences:1.1.4")    // ↓ см. примечание
+    implementation ("androidx.datastore:datastore-core-android:1.1.4")  // для core‑API
+    kapt (libs.dagger.hilt.android.compiler)
     kapt(libs.hilt.compiler.v252)
     // Gson
     implementation (libs.gson)

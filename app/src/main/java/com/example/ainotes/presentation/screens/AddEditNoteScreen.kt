@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,15 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import com.example.ainotes.ViewModels.notes.NotesViewModel
+import com.example.ainotes.viewModels.NotesViewModel
 import com.example.ainotes.utils.cleanResponse
-import com.example.linguareader.R
 
 @Composable
 fun AddEditNoteScreen(
@@ -81,11 +80,13 @@ fun AddEditNoteScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF5F5F5),
-                    unfocusedContainerColor = Color(0xFFF5F5F5),
+                    focusedContainerColor = colorScheme.surface,
+                    unfocusedContainerColor = colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Black
+                    cursorColor = colorScheme.onSecondary,
+                    focusedTextColor = colorScheme.onSecondary,
+                    unfocusedTextColor = colorScheme.onSecondary
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
@@ -104,12 +105,14 @@ fun AddEditNoteScreen(
                 singleLine = false,
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF5F5F5),
-                    unfocusedContainerColor = Color(0xFFF5F5F5),
+                    focusedContainerColor = colorScheme.surface,
+                    unfocusedContainerColor = colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Black
-                )
+                    cursorColor = colorScheme.onSecondary,
+                    focusedTextColor = colorScheme.onSecondary,
+                    unfocusedTextColor = colorScheme.onSecondary
+                ),
             )
 
             Spacer(Modifier.height(16.dp))
@@ -130,7 +133,8 @@ fun AddEditNoteScreen(
                         restoreState = true
                     }
                 },
-                colors = ButtonDefaults.buttonColors(colorResource(id = R.color.blue)),
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary,
+                    contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (!isEditing) "Создать заметку" else "Обновить заметку")
@@ -150,7 +154,8 @@ fun AddEditNoteScreen(
                         restoreState = true
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error,
+                    contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Отменить")

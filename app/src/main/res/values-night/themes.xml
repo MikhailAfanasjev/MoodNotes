@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.BookSearchApp" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- ваши цвета для тёмной темы -->
+    </style>
+</resources>

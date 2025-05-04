@@ -1,6 +1,10 @@
 package com.example.ainotes.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.example.ainotes.chatGPT.AuthInterceptor
 import com.example.ainotes.chatGPT.ChatGPTApiService
 import com.example.ainotes.utils.BaseUrlInterceptor
@@ -49,4 +53,11 @@ object NetworkModule {
     @Provides @Singleton
     fun provideChatGPTApiService(retrofit: Retrofit): ChatGPTApiService =
         retrofit.create(ChatGPTApiService::class.java)
+
+    @Provides @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("settings") }
+        )
+    }
 }

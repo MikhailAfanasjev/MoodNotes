@@ -1,6 +1,5 @@
-package com.example.ainotes.ViewModels.chat
+package com.example.ainotes.viewModels
 
-import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ainotes.chatGPT.ChatGPTApiService
@@ -27,13 +26,19 @@ class ChatViewModel @Inject constructor(
     private val chatRepo: ChatMessageRepository
 ) : ViewModel() {
 
+    companion object {
+        const val DEFAULT_SYSTEM_PROMPT = "Пиши ответы на русском языке"
+    }
+
     private val _chatMessages = MutableStateFlow<List<Message>>(emptyList())
     val chatMessages: StateFlow<List<Message>> = _chatMessages.asStateFlow()
 
     private val _selectedModel = MutableStateFlow("grok-3-gemma3-12b-distilled")
     val selectedModel: StateFlow<String> = _selectedModel.asStateFlow()
 
-    private val _systemPrompt = MutableStateFlow("Пиши ответы на русском языке")
+    private val _systemPrompt = MutableStateFlow(DEFAULT_SYSTEM_PROMPT)
+    val systemPrompt: StateFlow<String> = _systemPrompt.asStateFlow()
+    val defaultSystemPrompt: String = DEFAULT_SYSTEM_PROMPT
 
     val availableModels = listOf(
         "gemma-3-1b-it",
@@ -60,7 +65,7 @@ class ChatViewModel @Inject constructor(
     }
 
     private fun addMessage(message: Message) {
-        _chatMessages.value = _chatMessages.value + message
+        _chatMessages.value += message
         viewModelScope.launch {
             chatRepo.addMessage(
                 ChatMessageEntity(

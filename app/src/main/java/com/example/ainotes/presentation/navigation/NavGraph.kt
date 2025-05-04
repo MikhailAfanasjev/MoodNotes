@@ -9,8 +9,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.ainotes.ViewModels.notes.NotesViewModel
-import com.example.ainotes.ViewModels.chat.ChatViewModel
+import com.example.ainotes.viewModels.NotesViewModel
+import com.example.ainotes.viewModels.ChatViewModel
 import com.example.ainotes.presentation.screens.AddEditNoteScreen
 import com.example.ainotes.presentation.screens.ChatScreen
 import com.example.ainotes.presentation.screens.NoteScreen

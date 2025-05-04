@@ -14,12 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.ainotes.chatGPT.Message
+import com.example.ainotes.presentation.ui.theme.Blue
+import com.example.ainotes.presentation.ui.theme.UltraLightGray
 import com.example.linguareader.R
 
 @Composable
@@ -46,17 +52,20 @@ fun ChatMessageItem(
         )
     }
 
+    // Используем цвета из темы
+    val colorScheme = MaterialTheme.colorScheme
     val bubbleColor = if (isAssistant) {
-        colorResource(id = R.color.ultra_light_gray)
+        colorScheme.onPrimary // цвет bubble пользователя
     } else {
-        colorResource(id = R.color.blue)
+        colorScheme.primary // цвет bubble ИИ
     }
+    val contentColor = colorScheme.onSecondary
 
     if (message.content.isNotBlank()) {
         AnimatedVisibility(
-            visible = true, // Появляется сразу при добавлении в список
-            enter = fadeIn() + expandVertically(), // Красивая анимация появления
-            exit = fadeOut() + shrinkVertically()  // На будущее: красивая анимация исчезновения
+            visible = true,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
         ) {
             Row(
                 modifier = Modifier
@@ -69,18 +78,18 @@ fun ChatMessageItem(
                         .fillMaxWidth(0.85f),
                     contentAlignment = if (isAssistant) Alignment.CenterStart else Alignment.CenterEnd
                 ) {
-                    NoteSelectionContainer(
-                        text = message.content,
-                        onCreateNote = onCreateNote,
-                        modifier = Modifier
-                            .widthIn(min = 48.dp)
-                            .background(
-                                color = bubbleColor,
-                                shape = bubbleShape
-                            )
-                            .padding(8.dp)
-                            .animateContentSize() // Плавная анимация, если размер текста меняется
-                    )
+                    // Оборачиваем в локальный цвет контента
+                    CompositionLocalProvider(LocalContentColor provides contentColor) {
+                        NoteSelectionContainer(
+                            text = message.content,
+                            onCreateNote = onCreateNote,
+                            modifier = Modifier
+                                .widthIn(min = 48.dp)
+                                .background(color = bubbleColor, shape = bubbleShape)
+                                .padding(8.dp)
+                                .animateContentSize()
+                        )
+                    }
                 }
             }
         }

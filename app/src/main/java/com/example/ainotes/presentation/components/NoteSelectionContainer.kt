@@ -9,8 +9,10 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 
@@ -25,13 +27,14 @@ fun NoteSelectionContainer(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-
+    val colorScheme = MaterialTheme.colorScheme
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
             TextView(ctx).apply {
-                // делаем текст чёрным
-                setTextColor(android.graphics.Color.BLACK)
+
+                val textColor = colorScheme.onSecondary.toArgb()
+                setTextColor(textColor)
                 setText(text, TextView.BufferType.SPANNABLE)
                 setTextIsSelectable(true)
             }.also { tv ->
@@ -82,13 +85,11 @@ fun NoteSelectionContainer(
                     override fun onDestroyActionMode(mode: ActionMode) {}
                 }
 
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                    tv.customInsertionActionModeCallback = object : ActionMode.Callback {
-                        override fun onCreateActionMode(mode: ActionMode, menu: Menu) = false
-                        override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
-                        override fun onActionItemClicked(mode: ActionMode, item: MenuItem) = false
-                        override fun onDestroyActionMode(mode: ActionMode) {}
-                    }
+                tv.customInsertionActionModeCallback = object : ActionMode.Callback {
+                    override fun onCreateActionMode(mode: ActionMode, menu: Menu) = false
+                    override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+                    override fun onActionItemClicked(mode: ActionMode, item: MenuItem) = false
+                    override fun onDestroyActionMode(mode: ActionMode) {}
                 }
             }
         },

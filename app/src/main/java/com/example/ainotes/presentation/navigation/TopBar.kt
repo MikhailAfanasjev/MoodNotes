@@ -15,19 +15,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -40,14 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -55,14 +51,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.ainotes.ViewModels.chat.ChatViewModel
-import com.example.ainotes.ViewModels.notes.NotesViewModel
+import com.example.ainotes.viewModels.ChatViewModel
+import com.example.ainotes.viewModels.NotesViewModel
 import com.example.ainotes.chatGPT.Message
-import com.example.ainotes.presentation.ui.theme.Blue
-import com.example.ainotes.presentation.ui.theme.LightGray
-import com.example.ainotes.presentation.ui.theme.UltraLightGray
-import com.example.ainotes.presentation.ui.theme.White
-import com.example.ainotes.utils.NoRippleTheme
+import com.example.ainotes.viewModels.ThemeViewModel
 import com.example.linguareader.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +63,8 @@ fun TopBar(
     navController: NavController,
     chatViewModel: ChatViewModel = hiltViewModel(),
     chatMessages: List<Message>,
-    notesViewModel: NotesViewModel = hiltViewModel()
+    notesViewModel: NotesViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
     val iconSize = 24.dp
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -81,43 +74,37 @@ fun TopBar(
     var showModelMenu by remember { mutableStateOf(false) }
     val selectedModel by chatViewModel.selectedModel.collectAsState()
     val models = chatViewModel.availableModels
-    // Для позиционирования меню модели
+
     var menuBounds by remember { mutableStateOf<Rect?>(null) }
     var modelItemBounds by remember { mutableStateOf<Rect?>(null) }
-    var columnBounds by remember { mutableStateOf<Rect?>(null) }
-    // Получаем ширину экрана в dp
+
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.dp
-    // Задаём расстояние между «Чат» и «Заметки» как, скажем, 8% от ширины экрана
     val dynamicSpacing = screenWidthDp * 0.2f
-    LocalDensity.current
 
-    CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .onGloballyPositioned { coords ->
-                    columnBounds = coords.boundsInWindow()
-                }
+            modifier = Modifier.fillMaxWidth()
         ) {
             TopAppBar(
                 title = { /* пусто */ },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(96.dp)
                     .drawWithContent {
                         drawContent()
-                        val stroke = 2.dp.toPx()
-                        drawLine(
-                            color = LightGray,
-                            start = Offset(0f, size.height - stroke / 2),
-                            end = Offset(size.width, size.height - stroke / 2),
-                            strokeWidth = stroke
-                        )
+                        //val stroke = 2.dp.toPx()
+//                        drawLine(
+//                            color = colorScheme.onBackground, // цвет drawLine
+//                            start = Offset(0f, size.height - stroke / 2),
+//                            end = Offset(size.width, size.height - stroke / 2),
+//                            strokeWidth = stroke
+//                        )
                     },
                 navigationIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // --- Иконка приложения ---
                         Image(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
                             contentDescription = null,
@@ -126,7 +113,6 @@ fun TopBar(
                                 .padding(end = 8.dp)
                         )
 
-                        // Chat button + label
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -136,20 +122,19 @@ fun TopBar(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_chat),
                                 contentDescription = "Чат",
-                                tint = if (currentRoute == "chat") Blue else LightGray,
+                                tint = if (currentRoute == "chat") colorScheme.onTertiary else colorScheme.tertiary, // активный/неактивный
                                 modifier = Modifier.size(iconSize)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = "Чат",
-                                color = if (currentRoute == "chat") Blue else LightGray,
+                                color = if (currentRoute == "chat") colorScheme.onTertiary else colorScheme.tertiary, // активный/неактивный
                                 fontSize = 20.sp
                             )
                         }
 
                         Spacer(modifier = Modifier.width(dynamicSpacing))
 
-                        // Notes button + label
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -159,13 +144,13 @@ fun TopBar(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_notes),
                                 contentDescription = "Заметки",
-                                tint = if (currentRoute == "notes") Blue else LightGray,
+                                tint = if (currentRoute == "notes") colorScheme.onTertiary else colorScheme.tertiary, // активный/неактивный
                                 modifier = Modifier.size(iconSize)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = "Заметки",
-                                color = if (currentRoute == "notes") Blue else LightGray,
+                                color = if (currentRoute == "notes") colorScheme.onTertiary else colorScheme.tertiary, // активный/неактивный
                                 fontSize = 20.sp
                             )
                         }
@@ -179,7 +164,7 @@ fun TopBar(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Больше",
                                 modifier = Modifier.size(iconSize),
-                                tint = LightGray
+                                tint = colorScheme.tertiary
                             )
                         }
                         DropdownMenu(
@@ -189,25 +174,25 @@ fun TopBar(
                                 showModelMenu = false
                             },
                             modifier = Modifier
-                                .onGloballyPositioned { coords ->
-                                    menuBounds = coords.boundsInWindow()
-                                }
+                                .onGloballyPositioned { coords -> menuBounds = coords.boundsInWindow() }
                                 .width(200.dp),
-                            shape = RoundedCornerShape(16.dp),       // ← скругление
-                            containerColor = Color.White,            // ← фон контейнера
-                            tonalElevation = 8.dp                    // ← тень (M3), можно играть значением
+                            shape = RoundedCornerShape(16.dp),
+                            // ← Задаём фон меню secondary
+                            containerColor = colorScheme.background
                         ) {
-
-                            // Секция Model
                             DropdownMenuItem(
                                 modifier = Modifier
-                                    // сохраняем координаты — оставляем как есть
-                                    .onGloballyPositioned { coords ->
-                                        modelItemBounds = coords.boundsInWindow()
-                                    }
-                                    // добавляем фон, когда showModelMenu == true
-                                    .background(if (showModelMenu) UltraLightGray else Color.Transparent),
-                                text = { Text("Выбор модели") },
+                                    .onGloballyPositioned { coords -> modelItemBounds = coords.boundsInWindow() }
+                                    .background(if (showModelMenu) colorScheme.secondary else colorScheme.background),
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_model_selection),
+                                        contentDescription = null,
+                                        tint = colorScheme.onSecondary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
+                                text = { Text("Выбор модели", color = colorScheme.onSecondary) },
                                 trailingIcon = {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_more),
@@ -217,35 +202,37 @@ fun TopBar(
                                             .size(16.dp)
                                     )
                                 },
-                                onClick = {
-                                    showModelMenu = true
-                                }
+                                onClick = { showModelMenu = true },
                             )
 
-                            // Остальные пункты меню
                             DropdownMenuItem(
-                                text = { Text("Тема") },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_light_dark),
+                                        contentDescription = "Переключение темы",
+                                        tint = colorScheme.onSecondary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
+                                text = { Text("Тема", color = colorScheme.onSecondary) },
                                 onClick = {
+                                    themeViewModel.toggleTheme()
                                     showMenu = false
                                     showModelMenu = false
                                 }
                             )
+
                             if (currentRoute == "chat" && chatMessages.isNotEmpty()) {
                                 DropdownMenuItem(
                                     leadingIcon = {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_remove),
                                             contentDescription = "Очистить чат",
-                                            tint = colorResource(id = R.color.orange),
+                                            tint = colorScheme.onSurface, // цвет иконки удаления
                                             modifier = Modifier.size(24.dp)
                                         )
                                     },
-                                    text = {
-                                        Text(
-                                            text = "Очистить чат",
-                                            color = colorResource(id = R.color.orange)
-                                        )
-                                    },
+                                    text = { Text("Очистить чат", color = colorScheme.onSurface) }, // цвет текста очистки
                                     onClick = {
                                         showMenu = false
                                         showModelMenu = false
@@ -254,18 +241,25 @@ fun TopBar(
                                 )
                             }
                             if (currentRoute == "notes" && notes.isNotEmpty()) {
-                                IconButton(onClick = { notesViewModel.deleteAllNotes() }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_remove),
-                                        contentDescription = "Удалить все",
-                                        tint = Color.Red,
-                                        modifier = Modifier.size(iconSize)
-                                    )
-                                }
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_remove),
+                                            contentDescription = "Удалить заметки",
+                                            tint = colorScheme.onSurface, // цвет иконки удаления
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    },
+                                    text = { Text("Удалить заметки", color = colorScheme.onSurface) }, // цвет текста очистки
+                                    onClick = {
+                                        showMenu = false
+                                        showModelMenu = false
+                                        notesViewModel.deleteAllNotes()
+                                    }
+                                )
                             }
                         }
 
-                        // Вложенное меню выбора модели
                         if (showModelMenu && menuBounds != null && modelItemBounds != null) {
                             val offsetDp = with(LocalDensity.current) {
                                 DpOffset(
@@ -279,8 +273,8 @@ fun TopBar(
                                 offset = offsetDp,
                                 modifier = Modifier
                                     .width(200.dp)
-                                    .clip(RoundedCornerShape(12.dp))      // <-- скругляем
-                                    .background(Color.White)              // <-- фон
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(colorScheme.background) // фон меню моделей
                             ) {
                                 models.forEach { model ->
                                     DropdownMenuItem(
@@ -291,10 +285,14 @@ fun TopBar(
                                                     onClick = {
                                                         chatViewModel.setModel(model)
                                                         showModelMenu = false
-                                                    }
+                                                    },
+                                                    colors = RadioButtonDefaults.colors(
+                                                        selectedColor = colorScheme.primary, // цвет выбранного радио
+                                                        unselectedColor = colorScheme.tertiary
+                                                    )
                                                 )
                                                 Spacer(Modifier.width(8.dp))
-                                                Text(model)
+                                                Text(model, color = colorScheme.onSecondary)
                                             }
                                         },
                                         onClick = {
@@ -307,10 +305,10 @@ fun TopBar(
                         }
                     }
                 },
-                colors = topAppBarColors(
-                    containerColor = White,
-                    navigationIconContentColor = LightGray,
-                    actionIconContentColor = LightGray
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorScheme.background, // цвет фона TopBar
+                    navigationIconContentColor = colorScheme.tertiary,
+                    actionIconContentColor = colorScheme.tertiary
                 )
             )
         }

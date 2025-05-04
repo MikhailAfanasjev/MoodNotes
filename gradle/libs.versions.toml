@@ -1,61 +1,83 @@
 [versions]
-agp = "8.7.1"
+agp = "8.7.3"
 androidxHiltNavigationComposeVersion = "<version>"
-androidxNavigationComposeVersion = "2.8.4"
+androidxNavigationComposeVersion = "2.8.9"
 coilCompose = "3.0.4"
+constraintlayoutCompose = "1.1.1"
 converterGsonVersion = "2.10.0"
 coreKtxVersion = "1.16.0"
+datastorePreferences = "1.1.4"
 googleHiltAndroid = "2.52"
-gson = "2.10.1"
-hiltAndroid = "2.48.1"
-hiltAndroidVersion = "2.48.1"
-hiltCompiler = "2.48.1"
+googleHiltAndroidVersion = "2.52"
+gson = "2.11.0"
+hiltAndroid = "2.52"
+hiltAndroidVersion = "2.52"
+hiltCompiler = "2.52"
 hiltCompilerVersion = "2.52"
-hiltNavigationCompose = "1.0.0"
-kotlin = "1.9.23"
-coreKtx = "1.13.1"
+hiltNavigationCompose = "1.2.0"
+kotlin = "2.1.20"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.6"
-activityCompose = "1.9.2"
-composeBom = "2024.04.01"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.10.1"
+composeBom = "2025.04.01"
 loggingInterceptor = "4.12.0"
+material = "1.12.0"
 navigationCompose = "2.8.9"
 pdfboxAndroid = "2.0.27.0"
 realmAndroidLibrary = "10.19.0"
 realmGradlePlugin = "10.19.0"
 retrofitVersion = "2.10.0"
-room = "2.6.0"
-runtimeLivedata = "1.7.4"
-recyclerview = "1.3.2"
+room = "2.7.1"
+runtimeLivedata = "1.8.0"
+recyclerview = "1.4.0"
 appcompat = "1.7.0"
-protoliteWellKnownTypes = "18.0.0"
-retrofit = "2.9.0"
+protoliteWellKnownTypes = "18.0.1"
+retrofit = "2.10.0"
 converterGson = "2.9.0"
 securityCrypto = "1.1.0-alpha07"
-uiTestAndroid = "1.7.2"
+textflowMaterial3 = "1.2.1"
+uiTestAndroid = "1.8.0"
 realm = "10.19.0"
 uiToolingPreview = "1.8.0"
 workRuntimeKtx = "2.10.1"
+datastoreCoreAndroid = "1.1.4"
 
 [libraries]
+#noinspection SimilarGradleDependency
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+#noinspection SimilarGradleDependency
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+#noinspection SimilarGradleDependency
 androidx-core-ktx-v1160 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+#noinspection SimilarGradleDependency
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+#noinspection SimilarGradleDependency
 androidx-hilt-hilt-navigation-compose2 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHiltNavigationComposeVersion" }
+#noinspection SimilarGradleDependency
 androidx-hilt-navigation-compose-v100 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+#noinspection SimilarGradleDependency
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
+#noinspection SimilarGradleDependency
 androidx-navigation-compose-v289 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+#noinspection SimilarGradleDependency
 androidx-navigation-navigation-compose2 = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationComposeVersion" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+#noinspection SimilarGradleDependency
 dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
+#noinspection SimilarGradleDependency
+dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidVersion" }
+#noinspection SimilarGradleDependency
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroidVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-hilt-android-v2481 = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+#noinspection SimilarGradleDependency
 hilt-android-v252 = { module = "com.google.dagger:hilt-android", version.ref = "googleHiltAndroid" }
-hilt-compiler-v2481 = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+#noinspection SimilarGradleDependency
 hilt-compiler-v252 = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompilerVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -77,17 +99,26 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 realm-android-library = { module = "io.realm:realm-android-library", version.ref = "realmAndroidLibrary" }
 realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realmGradlePlugin" }
+#noinspection SimilarGradleDependency
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 converter-gson-v2100 = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGsonVersion" }
+#noinspection SimilarGradleDependency
 retrofit-v2100 = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
+textflow-material3 = { module = "io.github.oleksandrbalan:textflow-material3", version.ref = "textflowMaterial3" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
+
 [plugins]
+#noinspection SimilarGradleDependency
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
+#noinspection SimilarGradleDependency
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 realm-android = { id = "realm-android", version.ref = "realm" }

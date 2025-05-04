@@ -17,6 +17,7 @@ fun NoteDetailsDialog(
     note: Note,
     onDismiss: () -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -27,25 +28,27 @@ fun NoteDetailsDialog(
         Surface(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .fillMaxWidth(0.85f)    // 85% ширины
-                .fillMaxHeight(0.85f),  // 85% высоты
-            color = MaterialTheme.colorScheme.surface
+                .fillMaxWidth(0.85f)
+                .fillMaxHeight(0.85f),
+            color = colors.secondary // цвет фона диалога
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp)       // внутренний отступ для контента
+                    .padding(16.dp)
             ) {
                 Text(
                     text = note.title,
                     style = MaterialTheme.typography.titleLarge,
+                    color = colors.onSecondary, // цвет заголовка
                     maxLines = Int.MAX_VALUE
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = note.note,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSecondary, // цвет текста заметки
                     maxLines = Int.MAX_VALUE
                 )
             }
